@@ -169,21 +169,6 @@ export default function FileList({
       // Send delete request
       const response = await axios.delete(`/api/files/${fileId}/delete`);
 
-      // if (response.data.success) {
-      //   // Remove file from local state
-      //   setFiles(files.filter((file) => file.id !== fileId));
-
-      //   // Show success toast
-      //   toast.success("File Permanently Deleted", {
-      //     description: `"${fileName}" has been permanently removed`,
-      //   });
-
-      //   // Close modal if it was open
-      //   setDeleteModalOpen(false);
-      // } else {
-      //   throw new Error(response.data.error || "Failed to delete file");
-      // }
-
       // if we got here, status was 2xx → success
       setFiles(files.filter((file) => file.id !== fileId));
       toast.success("File Permanently Deleted", {
@@ -298,16 +283,6 @@ export default function FileList({
       });
     }
   };
-
-  // Function to open image in a new tab with optimized view
-  //   const openImageViewer = (file: FileType) => {
-  //     if (file.type.startsWith("image/")) {
-  //       // Create an optimized URL with ImageKit transformations for viewing
-  //       // Using higher quality and responsive sizing for better viewing experience
-  //       const optimizedUrl = `${process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT}/tr:q-90,w-1600,h-1200,fo-auto/${file.path}`;
-  //       window.open(optimizedUrl, "_blank");
-  //     }
-  //   };
 
   // Function to open files in a new tab
   const openFileViewer = (file: FileType) => {
@@ -449,15 +424,6 @@ export default function FileList({
                 td: "py-4",
               }}
             >
-              {/* <TableHeader>
-                <TableColumn>Name</TableColumn>
-                <TableColumn className="hidden sm:table-cell">Type</TableColumn>
-                <TableColumn className="hidden md:table-cell">Size</TableColumn>
-                <TableColumn className="hidden sm:table-cell">
-                  Added
-                </TableColumn>
-                <TableColumn width={240}>Actions</TableColumn>
-              </TableHeader> */}
               <TableHeader>
                 <TableRow>
                   <TableColumn>Name</TableColumn>

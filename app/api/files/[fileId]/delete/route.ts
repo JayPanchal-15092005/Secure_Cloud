@@ -63,12 +63,6 @@ export async function DELETE(
               limit: 1,
             });
 
-            // if (searchResults && searchResults.length > 0) {
-            //     await imagekit.deleteFile(searchResults[0].fileId);
-            // } else {
-            //     await imagekit.deleteFile(imagekitFileId);
-            // }
-
             if (
               searchResults &&
               searchResults.length > 0 &&

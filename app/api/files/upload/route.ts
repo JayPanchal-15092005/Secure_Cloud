@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-
     // if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
     //     return NextResponse.json(
     //     { error: "Only image files are supported" },
@@ -94,14 +93,6 @@ export async function POST(request: NextRequest) {
       folder: folderPath,
       useUniqueFileName: false,
     });
-
-    //    imagekit.upload({
-    //     file: fs.readFileSync("path/to/large/video.mp4"), // use streams for very large files
-    //     fileName: "large_video.mp4",
-    // },  function(error, result) {
-    //     if (error) console.error(error);
-    //     else console.log(result);
-    // })    
 
     const fileData = {
       name: originalFilename,
