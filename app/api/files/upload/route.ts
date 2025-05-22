@@ -5,7 +5,6 @@ import { files } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import ImageKit from "imagekit";
 import { v4 as uuidv4 } from "uuid";
-import fs from "node:fs";
 
 // Initialize ImageKit with your credentials
 const imagekit = new ImageKit({
@@ -67,13 +66,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
-    //     return NextResponse.json(
-    //     { error: "Only image files are supported" },
-    //     { status: 400 }
-    //   );
-    // }
 
     const buffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(buffer);

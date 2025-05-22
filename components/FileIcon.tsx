@@ -1,6 +1,6 @@
 "use client";
 
-import { Folder, FileText, FileVideo2, FileImage, File } from "lucide-react";
+import { Folder, FileText, FileVideo2, File } from "lucide-react";
 import { IKImage } from "imagekitio-next";
 import type { File as FileType } from "@/lib/db/schema";
 

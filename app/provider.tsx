@@ -55,8 +55,6 @@ const authenticator = async () => {
 };
 
 export function Providers({ children, themeProps }: ProvidersProps) {
-  const router = useRouter();
-
   return (
     <ImageKitProvider
       authenticator={authenticator}

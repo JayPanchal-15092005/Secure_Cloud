@@ -139,7 +139,7 @@ export default function FileList({
       setFiles(
         files.map((file) =>
           file.id === fileId ? { ...file, isTrash: !file.isTrash } : file
-        )
+        ) 
       );
 
       // Show toast
@@ -167,7 +167,7 @@ export default function FileList({
       const fileName = fileToDelete?.name || "File";
 
       // Send delete request
-      const response = await axios.delete(`/api/files/${fileId}/delete`);
+      await axios.delete(`/api/files/${fileId}/delete`);
 
       // if we got here, status was 2xx → success
       setFiles(files.filter((file) => file.id !== fileId));
@@ -209,7 +209,7 @@ export default function FileList({
   const handleDownloadFile = async (file: FileType) => {
     try {
       // Show loading toast
-      const loadingToastId = toast.loading("Preparing Download", {
+      toast.loading("Preparing Download", {
         description: `Getting "${file.name}" ready for download...`,
       });
 
@@ -286,7 +286,7 @@ export default function FileList({
 
   // Function to open files in a new tab
   const openFileViewer = (file: FileType) => {
-    const { type, path, fileUrl, name } = file;
+    const { type, path, fileUrl } = file;
     const base = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
 
     // IMAGE: use an ImageKit URL for a bigger, high‑quality view
