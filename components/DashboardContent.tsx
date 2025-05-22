@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FileUp, FileText, User } from "lucide-react";
+import { FileUp, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FileUploadForm from "./FileUploadForm";
 import FileList from "./FileList";

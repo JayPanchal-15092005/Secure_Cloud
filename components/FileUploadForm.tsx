@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogBody,
   DialogHeader,
   DialogFooter,
@@ -307,9 +306,9 @@ export default function FileUploadForm({
       <div className="bg-default-100/5 p-4 rounded-lg">
         <h4 className="text-sm font-medium mb-2">Tips</h4>
         <ul className="text-xs text-default-600 space-y-1">
-          <li>• Images (jpg, png, gif…), ≤ 50 MB</li>
-          <li>• Videos (mp4, mkv…), ≤ 400 MB</li>
-          <li>• PDFs, ≤ 50 MB</li>
+          <li>• Images (jpg, png, gif…), ≤ 90 MB</li>
+          <li>• Videos (mp4, mkv…), ≤ 100 MB</li>
+          <li>• PDFs, ≤ 90 MB</li>
         </ul>
       </div>
 
@@ -319,19 +318,17 @@ export default function FileUploadForm({
         onOpenChange={setFolderModalOpen}
         classNames={{ content: "border border-default-200 bg-default-5" }}
       >
-        <DialogContent>
           <DialogHeader className="border-b border-default-200 flex gap-2 items-center">
-            {/* <FolderPlus className="h-5 w-5 text-primary" /> */}
-            <DialogTitle className="text-base font-medium">
             <FolderPlus className="h-5 w-5 text-primary" />
+            <DialogTitle className="text-base font-medium">
               New Folder
             </DialogTitle>
-            {/* <span>New Folder</span> */}
           </DialogHeader>
-          <DialogBody>
+          <DialogBody className="border-t border-default-200 px-6 py-4">
             <p className="text-sm text-default-600 mb-2">
               Enter a name for your folder:
             </p>
+            <div className="px-6 pt-4">
             <Input
               type="text"
               placeholder="My Images"
@@ -339,8 +336,10 @@ export default function FileUploadForm({
               onChange={(e) => setFolderName(e.target.value)}
               autoFocus
             />
+            </div>
           </DialogBody>
-          <DialogFooter className="border-t border-default-200">
+          <DialogFooter className="border-t border-default-200 px-6 py-4">
+      { /*// */} <div className="flex items-center justify-end gap-4 w-full">
             <Button
               variant="destructive"
               onClick={() => setFolderModalOpen(false)}
@@ -355,8 +354,8 @@ export default function FileUploadForm({
             >
               Create
             </Button>
+            </div>
           </DialogFooter>
-        </DialogContent>
       </Dialog>
     </div>
   );

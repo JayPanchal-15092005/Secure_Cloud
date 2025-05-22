@@ -169,20 +169,27 @@ export default function FileList({
       // Send delete request
       const response = await axios.delete(`/api/files/${fileId}/delete`);
 
-      if (response.data.success) {
-        // Remove file from local state
-        setFiles(files.filter((file) => file.id !== fileId));
+      // if (response.data.success) {
+      //   // Remove file from local state
+      //   setFiles(files.filter((file) => file.id !== fileId));
 
-        // Show success toast
-        toast.success("File Permanently Deleted", {
-          description: `"${fileName}" has been permanently removed`,
-        });
+      //   // Show success toast
+      //   toast.success("File Permanently Deleted", {
+      //     description: `"${fileName}" has been permanently removed`,
+      //   });
 
-        // Close modal if it was open
-        setDeleteModalOpen(false);
-      } else {
-        throw new Error(response.data.error || "Failed to delete file");
-      }
+      //   // Close modal if it was open
+      //   setDeleteModalOpen(false);
+      // } else {
+      //   throw new Error(response.data.error || "Failed to delete file");
+      // }
+
+      // if we got here, status was 2xx → success
+      setFiles(files.filter((file) => file.id !== fileId));
+      toast.success("File Permanently Deleted", {
+        description: `"${fileName}" has been permanently removed.`,
+      });
+      setDeleteModalOpen(false);
     } catch (error) {
       console.error("Error deleting file:", error);
       toast.error("Deletion Failed", {

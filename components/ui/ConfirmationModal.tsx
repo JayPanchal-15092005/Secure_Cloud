@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-  DialogContent,
+  DialogTitle,
 } from "./dialog";
 
 interface ConfirmationModalProps {
@@ -47,10 +47,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       }}
       backdropClassName="bg-black/70"
     >
-      <DialogContent>
         <DialogHeader className="border-b border-default-200 flex gap-2 items-center">
           {Icon && <Icon className={`h-5 w-5 ${iconColor}`} />}
-          <span>{title}</span>
+          {/* <span>{title}</span> */}
+          <DialogTitle className="text-base font-medium">{title}</DialogTitle>
         </DialogHeader>
         <DialogBody>
           {isDangerous && warningMessage && (
@@ -70,11 +70,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           )}
           <p>{description}</p>
         </DialogBody>
-        <DialogFooter className="border-t border-default-200">
+        <DialogFooter className="flex justify-end gap-3 mt-6 border-t pt-4 border-default-200 mb-4">
             <Button
-            variant="default"
+            variant="outline"
             color="default"
             onClick={() => onOpenChange(false)}
+            className="rounded-md"
             >
                 {cancelText}
             </Button>
@@ -86,11 +87,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               onOpenChange(false);
             }}
             startContent={Icon && <Icon className="h-4 w-4" />}
+            className="rounded-md"
             >
                 {confirmText}
             </Button>
         </DialogFooter>
-      </DialogContent>
     </Dialog>
   );
 };
