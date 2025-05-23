@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Input } from "./ui/input";
+import ImageKit from "imagekitio-next";
 import {
   Upload,
   X,
