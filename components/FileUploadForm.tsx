@@ -232,7 +232,7 @@ export default function FileUploadForm({
               </button>
             </p>
             <p className="text-xs text-default-500 mt-1">
-              Supported: images (≤50 MB), videos (≤400 MB), PDFs (≤50 MB)
+              Supported: images (≤90 MB), videos (≤100 MB), PDFs (≤90 MB)
             </p>
             <Input
               type="file"
