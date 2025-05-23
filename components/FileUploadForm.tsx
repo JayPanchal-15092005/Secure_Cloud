@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Input } from "./ui/input";
-import ImageKit from "imagekitio-next";
+import ImageKit from "imagekit-javascript";
 import {
   Upload,
   X,
@@ -108,42 +108,104 @@ export default function FileUploadForm({
       ? `${(n / 1024).toFixed(1)} KB`
       : `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
-  const handleUpload = async () => { // 
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("userId", userId);
-    if (currentFolder) formData.append("parentId", currentFolder);
+  // const handleUpload = async () => { // 
+  //   if (!file) return;
+  //   const formData = new FormData();
+  //   formData.append("file", file);
+  //   formData.append("userId", userId);
+  //   if (currentFolder) formData.append("parentId", currentFolder);
 
-    setUploading(true);
-    setProgress(0);
-    setError(null);
+  //   setUploading(true);
+  //   setProgress(0);
+  //   setError(null);
 
-    try {
-      await axios.post("/api/files/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (evt) => {
-          if (evt.total) {
-            setProgress(Math.round((evt.loaded * 100) / evt.total));
-          }
-        },
-      });
+  //   try {
+  //     await axios.post("/api/files/upload", formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //       onUploadProgress: (evt) => {
+  //         if (evt.total) {
+  //           setProgress(Math.round((evt.loaded * 100) / evt.total));
+  //         }
+  //       },
+  //     });
 
-      toast.success("Upload Successful", {
-        description: `${file.name} has been uploaded successfully.`,
-      });
-      clearFile();
-      onUploadSuccess?.();
-    } catch (err) {
-      console.error(err);
-      setError("Failed to upload. Please try again.");
-      toast.error("Upload Failed", {
-        description: "We couldn't upload your file. Please try again.",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
+  //     toast.success("Upload Successful", {
+  //       description: `${file.name} has been uploaded successfully.`,
+  //     });
+  //     clearFile();
+  //     onUploadSuccess?.();
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError("Failed to upload. Please try again.");
+  //     toast.error("Upload Failed", {
+  //       description: "We couldn't upload your file. Please try again.",
+  //     });
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
+  const handleUpload = async () => {
+  if (!file) return;
+
+  setUploading(true);
+  setProgress(0);
+  setError(null);
+
+  try {
+    // Step 1: Get server-issued token
+    const { data: authParams } = await axios.get("/api/files/imagekit-auth");
+
+    // Step 2: Prepare ImageKit client
+    const imagekit = new ImageKit({
+      publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
+      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
+    });
+
+    // Step 3: Upload
+    imagekit.upload(
+      {
+        file: file,
+        fileName: file.name,
+        tags: ["dropbox-clone"],
+        folder: currentFolder ? `/droply/${userId}/folders/${currentFolder}` : `/droply/${userId}`,
+        ...authParams,
+      },
+      async (err: any, result: any) => {
+        if (err) {
+          console.error("ImageKit upload error:", err);
+          setError("Upload failed. Please try again.");
+          toast.error("Upload Failed");
+        } else {
+          // Optional: Notify your backend to store metadata
+          await axios.post("/api/files/record", {
+            name: result.name,
+            path: result.filePath,
+            size: file.size,
+            type: file.type,
+            fileUrl: result.url,
+            thumbnailUrl: result.thumbnailUrl || null,
+            userId,
+            parentId: currentFolder || null,
+          });
+
+          toast.success("Upload Successful", {
+            description: `${file.name} has been uploaded successfully.`,
+          });
+          clearFile();
+          onUploadSuccess?.();
+        }
+
+        setUploading(false);
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    setError("Failed to upload. Please try again.");
+    toast.error("Upload Failed");
+    setUploading(false);
+  }
+};
 
   const handleCreateFolder = async () => {
     if (!folderName.trim()) {
