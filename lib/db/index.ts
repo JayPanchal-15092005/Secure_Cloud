@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import * as schema from "./schema";
+import { files } from "./schema";
 
 /**
  * Step 1: Create a SQL client using Neon's serverless driver
