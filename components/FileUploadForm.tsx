@@ -104,10 +104,10 @@ export default function FileUploadForm({
     n < 1024
       ? `${n} B`
       : n < 1024 * 1024
-      ? `${(n / 1024).toFixed(1)} KB`
+      ? `${(n / 1024).toFixed(1)} KB`
       : `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
-  const handleUpload = async () => {
+  const handleUpload = async () => { // 
     if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
