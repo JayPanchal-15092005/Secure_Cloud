@@ -1,23 +1,29 @@
 # Cloud Storage
 
-A simple file storage application built with Next.js, Clerk, Neon, Drizzle, and ShadcnUI.
+A modern and secure file management web application built with **Next.js**, **Clerk**, **Neon**, **Drizzle**, and **ShadcnUI**. This app allows users to upload, manage, and organize their files with ease, while offering a responsive design and support for **Dark and Light modes**.
 
-## Features
+## 🧩 Project Description
 
-- User authentication with Clerk
-- File uploads with ImageKit
-- File management (star, trash)
-- Responsive UI with ShadcnUI
+**Cloud Storage** is a secure file storage platform designed for simplicity and performance. Built using modern web technologies, it features robust authentication, efficient file handling via CDN, and a polished user interface. Users can easily upload files, manage them by starring or trashing, and access them from any device. With support for both **Dark and Light themes**, the app provides a smooth experience in any lighting condition.
 
-## Tech Stack
+## 🔥 Features
 
-- **Frontend**: Next.js, HeroUI
+- 🔐 **User Authentication** with [Clerk](https://clerk.com/)
+- ☁️ **File Upload and CDN Delivery** using [ImageKit](https://imagekit.io/)
+- 🗂️ **File Management** – Upload, Star, Trash, Restore
+- 🌙 **Dark and Light Mode** support
+- 📱 **Responsive UI** built with [ShadcnUI](https://ui.shadcn.com)
+- 🛠️ **Modern Stack** using Next.js App Router and Drizzle ORM
+
+## 🧰 Tech Stack
+
+- **Frontend**: Next.js, ShadcnUI
 - **Authentication**: [Clerk](https://clerk.com/)
 - **Database**: Neon (PostgreSQL)
 - **ORM**: Drizzle
 - **File Storage**: [ImageKit](https://imagekit.io/)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -32,8 +38,6 @@ A simple file storage application built with Next.js, Clerk, Neon, Drizzle, and 
 
    ```bash
    git clone https://github.com/JayPanchal-15092005/Secure_Cloud.git
-   cd droply
-   ```
 
 2. Install dependencies:
 
