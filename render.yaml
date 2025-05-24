@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: Secure_Cloud
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /
+    disk:
+      name: uploads
+      mountPath: /uploads
+    headers:
+      - key: "client_max_body_size"
+        value: "100m"
