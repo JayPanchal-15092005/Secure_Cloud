@@ -4,7 +4,7 @@ A modern and secure file management web application built with **Next.js**, **Cl
 
 ## 🧩 Project Description
 
-**Cloud Storage** is a secure file storage platform designed for simplicity and performance. Built using modern web technologies, it features robust authentication, efficient file handling via CDN, and a polished user interface. Users can easily upload files, manage them by starring or trashing, and access them from any device. With support for both **Dark and Light themes**, the app provides a smooth experience in any lighting condition.
+**Secure Cloud** is a secure file storage platform designed for simplicity and performance. Built using modern web technologies, it features robust authentication, efficient file handling via CDN, and a polished user interface. Users can easily upload files, manage them by starring or trashing, and access them from any device. With support for both **Dark and Light themes**, the app provides a smooth experience in any lighting condition.
 
 ## 🔥 Features
 
