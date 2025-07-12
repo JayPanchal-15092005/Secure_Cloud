@@ -49,7 +49,7 @@ export default async function Dashboard() {
               {/* Please change this name after testing */}
             </div>
             <p className="text-default-500 text-sm">
-              {/* Please change this name after testing Droply */}
+              {/* Please change this name after testing (Droply) */}
               &copy; {new Date().getFullYear()} Cloud Storage 
             </p>
           </div>
