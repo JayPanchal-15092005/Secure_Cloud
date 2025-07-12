@@ -3,14 +3,14 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, SignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
 import { signInSchema } from "@/schemas/signInSchema";
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import {
-  Card,
+  Card, 
   CardContent,
   CardHeader,
   CardFooter,
