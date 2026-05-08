@@ -5,6 +5,7 @@ import type { NextAuthConfig } from "next-auth";
 // because bcryptjs requires Node.js crypto APIs not available in Edge Runtime.
 // The actual credential validation happens in auth.ts (server-side only).
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: {
     signIn: "/sign-in",
     error: "/sign-in",
