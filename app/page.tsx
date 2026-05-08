@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { auth } from "@/auth";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="min-h-screen flex flex-col bg-default-50">
       <Navbar />
@@ -33,19 +36,20 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-4 pt-4 justify-center lg:justify-start">
-                  <SignedOut>
-                    <Link href="/sign-up">
-                      <Button color="primary" size="lg" variant="ghost">
-                        Get Started
-                      </Button>
-                    </Link>
-                    <Link href="/sign-in">
-                      <Button size="lg" variant="secondary" color="primary">
-                        Sign In
-                      </Button>
-                    </Link>
-                  </SignedOut>
-                  <SignedIn>
+                  {!isLoggedIn ? (
+                    <>
+                      <Link href="/sign-up">
+                        <Button color="primary" size="lg" variant="ghost">
+                          Get Started
+                        </Button>
+                      </Link>
+                      <Link href="/sign-in">
+                        <Button size="lg" variant="secondary" color="primary">
+                          Sign In
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
                     <Link href="/dashboard">
                       <Button
                         size="lg"
@@ -56,7 +60,7 @@ export default function Home() {
                         Go to Dashboard
                       </Button>
                     </Link>
-                  </SignedIn>
+                  )}
                 </div>
               </div>
               <div className="flex justify-center order-first lg:order-last">
@@ -124,7 +128,7 @@ export default function Home() {
             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-default-900">
               Ready?
             </h2>
-            <SignedOut>
+            {!isLoggedIn ? (
               <div className="flex flex-wrap justify-center gap-4 mt-8">
                 <Link href="/sign-up">
                   <Button
@@ -133,12 +137,11 @@ export default function Home() {
                     color="primary"
                     endContent={<ArrowRight className="h-4 w-4" />}
                   >
-                    Let's Go
+                    Let&apos;s Go
                   </Button>
                 </Link>
               </div>
-            </SignedOut>
-            <SignedIn>
+            ) : (
               <Link href="/dashboard">
                 <Button
                   size="lg"
@@ -149,7 +152,7 @@ export default function Home() {
                   Dashboard
                 </Button>
               </Link>
-            </SignedIn>
+            )}
           </div>
         </section>
       </main>

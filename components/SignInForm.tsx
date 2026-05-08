@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignIn, SignIn } from "@clerk/nextjs";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
@@ -21,7 +21,6 @@ import { Separator } from "./ui/separator";
 
 export default function SignInForm() {
   const router = useRouter();
-  const { signIn, isLoaded, setActive } = useSignIn();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,36 +32,31 @@ export default function SignInForm() {
   } = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      identifier: "",
+      email: "",
       password: "",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    if (!isLoaded) return;
-
     setIsSubmitting(true);
     setAuthError(null);
 
     try {
-      const result = await signIn.create({
-        identifier: data.identifier,
+      const result = await signIn("credentials", {
+        email: data.email,
         password: data.password,
+        redirect: false,
       });
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
+      if (result?.error) {
+        setAuthError("Invalid email or password. Please try again.");
       } else {
-        console.error("Sign-in incomplete:", result);
-        setAuthError("Sign-in could not be completed. Please try again.");
+        router.push("/dashboard");
+        router.refresh();
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Sign-in error:", error);
-      setAuthError(
-        error.errors?.[0]?.message ||
-          "An error occurred during sign-in. Please try again."
-      );
+      setAuthError("An error occurred during sign-in. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -90,19 +84,19 @@ export default function SignInForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
             <label
-              htmlFor="identifier"
+              htmlFor="email"
               className="text-sm font-medium text-default-900"
             >
               Email
             </label>
             <Input
-              id="identifier"
+              id="email"
               type="email"
               placeholder="your.email@example.com"
               startContent={<Mail className="h-4 w-4 text-default-500" />}
-              isInvalid={!!errors.identifier}
-              errorMessage={errors.identifier?.message}
-              {...register("identifier")}
+              isInvalid={!!errors.email}
+              errorMessage={errors.email?.message}
+              {...register("email")}
               className="w-full"
             />
           </div>
@@ -158,7 +152,7 @@ export default function SignInForm() {
 
       <CardFooter className="flex justify-center py-4">
         <p className="text-sm text-default-600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/sign-up"
             className="text-primary hover:underline font-medium"

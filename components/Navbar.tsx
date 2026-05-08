@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, SignedIn, SignedOut } from "@clerk/nextjs";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { CloudUpload, ChevronDown, User, Menu, X } from "lucide-react";
@@ -15,21 +15,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "./ui/ThemeToggle";
 
-interface SerializedUser {
-  id: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  imageUrl?: string | null;
-  username?: string | null;
-  emailAddress?: string | null;
-}
-
-interface NavbarProps {
-  user?: SerializedUser | null;
-}
-
-export default function Navbar({ user }: NavbarProps) {
-  const { signOut } = useClerk();
+export default function Navbar() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const router = useRouter();
   const pathName = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,30 +75,22 @@ export default function Navbar({ user }: NavbarProps) {
     };
   }, [isMobileMenuOpen]);
 
-  const handleSignOut = () => {
-    signOut(() => {
-      router.push("/");
-    });
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
+  const user = session?.user;
   const userDetails = {
-    fullName: user
-      ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-      : "",
-    initials: user
-      ? `${user.firstName || ""} ${user.lastName || ""}`
-          .trim()
-          .split(" ")
-          .map((name) => name?.[0] || "")
-          .join("")
-          .toUpperCase() || "U"
-      : "U",
-    displayName: user
-      ? user.firstName && user.lastName
-        ? `${user.firstName} ${user.lastName}`
-        : user.firstName || user.username || user.emailAddress || "User"
-      : "User",
-    email: user?.emailAddress || "",
+    fullName: user?.name || user?.email?.split("@")[0] || "",
+    initials: (user?.name || user?.email || "U")
+      .trim()
+      .split(" ")
+      .map((n) => n?.[0] || "")
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U",
+    displayName: user?.name || user?.email?.split("@")[0] || "User",
+    email: user?.email || "",
   };
 
   const toggleMobileMenu = () => {
@@ -132,20 +112,22 @@ export default function Navbar({ user }: NavbarProps) {
 
           <div className="hidden md:flex gap-4 items-center">
             <ThemeToggle />
-            <SignedOut>
-              <Link href="sign-in">
-                <Button variant="ghost" color="primary">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button variant="ghost" color="primary">
-                  Sign Up
-                </Button>
-              </Link>
-            </SignedOut>
+            {!isLoggedIn && (
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" color="primary">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button variant="ghost" color="primary">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
 
-            <SignedIn>
+            {isLoggedIn && (
               <div className="flex items-center gap-4">
                 {!isOnDashboard && (
                   <Link href="/dashboard">
@@ -165,7 +147,6 @@ export default function Navbar({ user }: NavbarProps) {
                         <Avatar
                           name={userDetails.initials}
                           size="sm"
-                          src={user?.imageUrl || undefined}
                           className="h-8 w-8 flex-shrink-0"
                           fallback={<User className="h-4 w-4" />}
                         />
@@ -202,19 +183,18 @@ export default function Navbar({ user }: NavbarProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </SignedIn>
+            )}
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <SignedIn>
+            {isLoggedIn && (
               <Avatar
                 name={userDetails.initials}
                 size="sm"
-                src={user?.imageUrl || undefined}
                 className="h-8 w-8 flex-shrink-0"
                 fallback={<User className="h-4 w-4" />}
               />
-            </SignedIn>
+            )}
             <button
               className="z-50 p-2"
               onClick={toggleMobileMenu}
@@ -243,10 +223,10 @@ export default function Navbar({ user }: NavbarProps) {
               isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             } md:hidden`}
           >
-            <SignedOut>
+            {!isLoggedIn && (
               <div className="flex flex-col gap-4 items-center">
                 <Link
-                  href="sign-in"
+                  href="/sign-in"
                   className="w-full"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -264,15 +244,14 @@ export default function Navbar({ user }: NavbarProps) {
                   </Button>
                 </Link>
               </div>
-            </SignedOut>
+            )}
 
-            <SignedIn>
+            {isLoggedIn && (
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-3 py-4 border-b border-default-200">
                   <Avatar
                     name={userDetails.initials}
                     size="md"
-                    src={user?.imageUrl || undefined}
                     className="h-10 w-10 flex-shrink-0"
                     fallback={<User className="h-5 w-5" />}
                   />
@@ -312,7 +291,7 @@ export default function Navbar({ user }: NavbarProps) {
                   </button>
                 </div>
               </div>
-            </SignedIn>
+            )}
           </div>
         </div>
       </div>

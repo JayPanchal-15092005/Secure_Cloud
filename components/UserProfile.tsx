@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardFooter } from "./ui/card";
 import { Spinner } from "./ui/spinner";
@@ -9,14 +9,13 @@ import { Separator } from "./ui/separator";
 import Badge from "./ui/Badge";
 import { useRouter } from "next/navigation";
 import { Mail, User, LogOut, Shield, ArrowRight } from "lucide-react";
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { AvatarFallback } from "@radix-ui/react-avatar";
 
 export default function UserProfile() {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  if (!isLoaded) {
+  if (status === "loading") {
     return (
       <div className="flex flex-col justify-center items-center p-12">
         <Spinner size="large" />
@@ -25,7 +24,7 @@ export default function UserProfile() {
     );
   }
 
-  if (!isSignedIn) {
+  if (!session) {
     return (
       <Card className="max-w-md mx-auto border border-default-200 bg-default-50 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex gap-3">
@@ -56,20 +55,19 @@ export default function UserProfile() {
     );
   }
 
-  const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
-  const email = user.primaryEmailAddress?.emailAddress || "";
-  const initials = fullName
+  const user = session.user;
+  const email = user?.email || "";
+  const name = user?.name || email.split("@")[0] || "";
+  const initials = name
+    .trim()
     .split(" ")
-    .map((name) => name[0])
+    .map((n: string) => n[0])
     .join("")
-    .toUpperCase();
+    .toUpperCase()
+    .slice(0, 2);
 
-  const userRole = user.publicMetadata.role as string | undefined;
-
-  const handleSignOut = () => {
-    signOut(() => {
-      router.push("/");
-    });
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -81,32 +79,15 @@ export default function UserProfile() {
       <Separator />
       <CardContent className="py-6">
         <div className="flex flex-col items-center text-center mb-6">
-          {user.imageUrl ? (
-            <Avatar className="mb-4 h-24 w-24">
-              <AvatarImage src={user.imageUrl} alt={fullName} />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <Avatar className="mb-4 h-24 w-24 text-lg">
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-          )}
-          <h3 className="text-xl font-semibold">{fullName}</h3>
-          {user.emailAddresses && user.emailAddresses.length > 0 && (
+          <Avatar className="mb-4 h-24 w-24 text-lg">
+            <AvatarFallback>{initials || "U"}</AvatarFallback>
+          </Avatar>
+          <h3 className="text-xl font-semibold">{name}</h3>
+          {email && (
             <div className="flex items-center gap-2 mt-1 text-default-500">
               <Mail className="h-4 w-4" />
               <span>{email}</span>
             </div>
-          )}
-          {userRole && (
-            <Badge
-              color="primary"
-              variant="flat"
-              className="mt-3"
-              aria-label={`User role: ${userRole}`}
-            >
-              {userRole}
-            </Badge>
           )}
         </div>
 
@@ -133,21 +114,11 @@ export default function UserProfile() {
               <span className="font-medium">Email Verification</span>
             </div>
             <Badge
-              color={
-                user.emailAddresses?.[0]?.verification?.status === "verified"
-                  ? "success"
-                  : "warning"
-              }
+              color="success"
               variant="flat"
-              aria-label={`Email verification status: ${
-                user.emailAddresses?.[0]?.verification?.status === "verified"
-                  ? "Verified"
-                  : "Pending"
-              }`}
+              aria-label="Email verification status: Verified"
             >
-              {user.emailAddresses?.[0]?.verification?.status === "verified"
-                ? "Verified"
-                : "Pending"}
+              Verified
             </Badge>
           </div>
         </div>

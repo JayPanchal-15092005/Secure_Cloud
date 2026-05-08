@@ -62,4 +62,19 @@ export type File = typeof files.$inferSelect;
 export type NewFile = typeof files.$inferInsert;
 
 
+/**
+ * Users Table
+ *
+ * Stores user accounts for custom email/password authentication.
+ */
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(), // bcrypt hashed password
+  name: text("name"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
