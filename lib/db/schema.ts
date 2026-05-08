@@ -1,5 +1,5 @@
 import { pgTable, text, uuid, integer, boolean, timestamp} from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const files = pgTable("files", {
    // Unique identifier for each file/folder
@@ -25,8 +25,8 @@ export const files = pgTable("files", {
    isTrash: boolean("is_trash").default(false).notNull(), // Items in trash
 
    // Timestamps
-   createdAt: timestamp("created_at").defaultNow().notNull(),
-   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+   createdAt: timestamp("created_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
+   updatedAt: timestamp("updated_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
 });
 
 /**
@@ -72,8 +72,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(), // bcrypt hashed password
   name: text("name"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
