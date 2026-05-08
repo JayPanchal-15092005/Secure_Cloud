@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
