@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import Imagekit from "imagekit";
 
 // Initialize ImageKit with your credentials
@@ -12,7 +12,8 @@ const imagekit = new Imagekit({
 export async function GET(){
     try {
         // Check authentication
-        const { userId } = await auth();
+        const session = await auth();
+        const userId = session?.user?.id;
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized"}, { status: 401})
