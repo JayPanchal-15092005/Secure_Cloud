@@ -8,7 +8,7 @@ A modern and secure file management web application built with **Next.js**, **Cl
 
 ## 🔥 Features
 
-- 🔐 **User Authentication** with [Clerk](https://clerk.com/)
+
 - ☁️ **File Upload and CDN Delivery** using [ImageKit](https://imagekit.io/)
 - 🗂️ **File Management** – Upload, Star, Trash, Restore
 - 🌙 **Dark and Light Mode** support
