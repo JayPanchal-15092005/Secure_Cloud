@@ -10,7 +10,7 @@ export default async function Dashboard() {
   if (!session?.user) {
     redirect("/sign-in");
   }
-
+  
   const userId = session.user.id!;
   const userName = session.user.name || session.user.email?.split("@")[0] || "";
 
