@@ -1,6 +1,6 @@
 # Cloud Storage
 
-A modern and secure file management web application built with **Next.js**, **Clerk**, **Neon**, **Drizzle**, and **ShadcnUI**. This app allows users to upload, manage, and organize their files with ease, while offering a responsive design and support for **Dark and Light modes**.
+A modern and secure file management web application built with **Next.js**, **Neon**, **Drizzle**, and **ShadcnUI**. This app allows users to upload, manage, and organize their files with ease, while offering a responsive design and support for **Dark and Light modes**.
 
 ## 🧩 Project Description
 
@@ -28,7 +28,6 @@ A modern and secure file management web application built with **Next.js**, **Cl
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Clerk account
 - Neon PostgreSQL database
 - ImageKit account
 
@@ -52,24 +51,11 @@ A modern and secure file management web application built with **Next.js**, **Cl
 3. Create a `.env.local` file in the root directory with the following environment variables:
 
    ```
-   # Clerk Authentication
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
 
    # ImageKit
    NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
    IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
    NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
-
-   # Clerk URLs
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-
-   # Fallback URLs
-   NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
-   NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 
    # App URLs
    NEXT_PUBLIC_APP_URL=http://localhost:3000
