@@ -33,14 +33,14 @@ export default function UserProfile() {
     return (
       <div className="flex flex-col justify-center items-center p-12">
         <Spinner size="large" />
-        <p className="mt-4 text-default-600"> Loading your profile...</p>
+        <p className="mt-4 text-muted-foreground text-sm">Loading your profile...</p>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <Card className="max-w-md mx-auto border border-default-200 bg-default-50 shadow-sm hover:shadow-md transition-shadow">
+      <Card className="max-w-md mx-auto border border-border bg-card shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex gap-3">
           <User className="h-6 w-6 text-primary" />
           <h2 className="text-xl font-semibold">User Profile</h2>
@@ -50,7 +50,7 @@ export default function UserProfile() {
           <div className="mb-6">
             <Avatar name="Guest" size="lg" className="mx-auto mb-4" />
             <p className="text-lg font-medium">Not Signed In</p>
-            <p className="text-default-500 mt-2">
+            <p className="text-muted-foreground mt-2 text-sm">
               Please sign in to access your profile
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function UserProfile() {
   };
 
   return (
-    <Card className="max-w-md mx-auto border border-default-200 bg-default-50 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="max-w-md mx-auto border border-border bg-card shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="flex gap-3">
         <User className="h-6 w-6 text-primary" />
         <h2 className="text-xl font-semibold">User Profile</h2>
@@ -220,17 +220,17 @@ export default function UserProfile() {
                 variant="ghost"
                 onClick={handleRemoveAvatar}
                 isLoading={removingAvatar}
-                startContent={<Trash2 className="h-3.5 w-3.5 text-danger" />}
-                className="h-7 text-xs text-danger hover:bg-danger/10"
+                startContent={<Trash2 className="h-3.5 w-3.5 text-destructive" />}
+                className="h-7 text-xs text-destructive hover:bg-destructive/10"
               >
                 Remove
               </Button>
             )}
           </div>
 
-          <h3 className="text-xl font-semibold text-default-900">{name}</h3>
+          <h3 className="text-xl font-semibold text-foreground">{name}</h3>
           {email && (
-            <div className="flex items-center gap-1.5 mt-1 text-sm text-default-500">
+            <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
               <Mail className="h-3.5 w-3.5" />
               <span>{email}</span>
             </div>
@@ -259,7 +259,7 @@ export default function UserProfile() {
               <CheckCircle2 className="h-5 w-5 text-primary/70" />
               <span className="font-medium text-sm">Storage Provider</span>
             </div>
-            <span className="text-xs text-default-500 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               ImageKit & Neon DB
             </span>
           </div>

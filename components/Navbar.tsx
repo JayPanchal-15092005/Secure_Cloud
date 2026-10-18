@@ -1,9 +1,9 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CloudUpload, ChevronDown, User, Menu, X } from "lucide-react";
+import { CloudUpload, ChevronDown, User, Menu, X, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -79,6 +79,17 @@ export default function Navbar() {
     await signOut({ callbackUrl: "/" });
   };
 
+  const navigateToTab = (tab: "files" | "profile") => {
+    if (isOnDashboard) {
+      window.dispatchEvent(
+        new CustomEvent("dashboard-tab-change", { detail: tab })
+      );
+      router.replace(`/dashboard?tab=${tab}`, { scroll: false });
+    } else {
+      router.push(`/dashboard?tab=${tab}`);
+    }
+  };
+
   const user = session?.user;
   const userDetails = {
     fullName: user?.name || user?.email?.split("@")[0] || "",
@@ -100,7 +111,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`bg-default-50 border-b border-default-200 fixed top-0 w-full z-50 transition-shadow h-20${
+      className={`bg-background/95 backdrop-blur-md border-b border-border fixed top-0 w-full z-50 transition-shadow h-20 ${
         isScrolled ? "shadow-sm" : ""
       }`}
     >
@@ -108,7 +119,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 z-10">
             <CloudUpload className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Cloud Storage</h1>
+            <h1 className="text-xl font-bold tracking-tight">Cloud Storage</h1>
           </Link>
 
           <div className="hidden md:flex gap-4 items-center">
@@ -152,32 +163,42 @@ export default function Navbar() {
                           className="h-8 w-8 flex-shrink-0"
                           fallback={<User className="h-4 w-4" />}
                         />
-                        <span className="text-default-600 hidden sm:inline">
+                        <span className="text-foreground/80 font-medium hidden sm:inline">
                           {userDetails.displayName}
                         </span>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent aria-label="User actions">
+                  <DropdownMenuContent aria-label="User actions" align="end" className="w-56">
                     <DropdownMenuItem
                       key="profile"
                       description={userDetails.email || "View your profile"}
-                      onClick={() => router.push("/dashboard?tab=profile")}
+                      onSelect={() => navigateToTab("profile")}
+                      onClick={() => navigateToTab("profile")}
+                      className="cursor-pointer"
                     >
-                      Profile
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        <span>Profile</span>
+                      </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       key="files"
                       description="Manage your files"
-                      onClick={() => router.push("/dashboard")}
+                      onSelect={() => navigateToTab("files")}
+                      onClick={() => navigateToTab("files")}
+                      className="cursor-pointer"
                     >
-                      My Files
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span>My Files</span>
+                      </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       key="logout"
                       description="Sign out of your account"
-                      className="text-danger"
-                      color="danger"
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                      variant="destructive"
                       onClick={handleSignOut}
                     >
                       Sign Out
@@ -199,22 +220,22 @@ export default function Navbar() {
               />
             )}
             <button
-              className="z-50 p-2"
+              className="z-50 p-2 cursor-pointer"
               onClick={toggleMobileMenu}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               data-menu-button="true"
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6 text-default-700" />
+                <X className="h-6 w-6 text-foreground" />
               ) : (
-                <Menu className="h-6 w-6 text-default-700" />
+                <Menu className="h-6 w-6 text-foreground" />
               )}
             </button>
           </div>
 
           {isMobileMenuOpen && (
             <div
-              className="fixed inset-0 bg-black/20 z-40 md:hidden"
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               aria-hidden="true"
             />
@@ -222,7 +243,7 @@ export default function Navbar() {
 
           <div
             ref={mobileMenuRef}
-            className={`fixed top-0 right-0 bottom-0 w-4/5 max-w-sm bg-default-50 z-40 flex flex-col pt-20 px-6 shadow-xl transition-transform duration-300 ease-in-out ${
+            className={`fixed top-0 right-0 bottom-0 w-4/5 max-w-sm bg-background border-l border-border z-50 flex flex-col pt-20 px-6 shadow-xl transition-transform duration-300 ease-in-out ${
               isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             } md:hidden`}
           >
@@ -251,7 +272,7 @@ export default function Navbar() {
 
             {isLoggedIn && (
               <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-3 py-4 border-b border-default-200">
+                <div className="flex items-center gap-3 py-4 border-b border-border">
                   <Avatar
                     src={userDetails.avatarUrl}
                     name={userDetails.initials}
@@ -259,33 +280,46 @@ export default function Navbar() {
                     className="h-10 w-10 flex-shrink-0"
                     fallback={<User className="h-5 w-5" />}
                   />
-                  <div>
-                    <p className="font-medium">{userDetails.displayName}</p>
-                    <p className="text-sm text-default-500">
+                  <div className="overflow-hidden">
+                    <p className="font-medium truncate">{userDetails.displayName}</p>
+                    <p className="text-sm text-muted-foreground truncate">
                       {userDetails.email}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                   {!isOnDashboard && (
                     <Link
                       href="/dashboard"
-                      className="py-2 px-3 hover:bg-default-100 rounded-md transition-colors"
+                      className="py-2.5 px-3 hover:bg-muted rounded-md transition-colors font-medium"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                   )}
-                  <Link
-                    href="/dashboard?tab=profile"
-                    className="py-2 px-3 hover:bg-default-100 rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
                   <button
-                    className="py-2 px-3 text-left text-danger hover:bg-danger-50 rounded-md transition-colors mt-4"
+                    className="py-2.5 px-3 text-left hover:bg-muted rounded-md transition-colors font-medium flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigateToTab("files");
+                    }}
+                  >
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span>My Files</span>
+                  </button>
+                  <button
+                    className="py-2.5 px-3 text-left hover:bg-muted rounded-md transition-colors font-medium flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigateToTab("profile");
+                    }}
+                  >
+                    <User className="h-4 w-4 text-primary" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    className="py-2.5 px-3 text-left text-destructive hover:bg-destructive/10 rounded-md transition-colors mt-4 cursor-pointer font-medium"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       handleSignOut();
