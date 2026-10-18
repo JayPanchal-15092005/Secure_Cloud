@@ -82,6 +82,7 @@ export default function Navbar() {
   const user = session?.user;
   const userDetails = {
     fullName: user?.name || user?.email?.split("@")[0] || "",
+    avatarUrl: user?.image || undefined,
     initials: (user?.name || user?.email || "U")
       .trim()
       .split(" ")
@@ -145,6 +146,7 @@ export default function Navbar() {
                     >
                       <div className="flex items-center gap-2">
                         <Avatar
+                          src={userDetails.avatarUrl}
                           name={userDetails.initials}
                           size="sm"
                           className="h-8 w-8 flex-shrink-0"
@@ -189,6 +191,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             {isLoggedIn && (
               <Avatar
+                src={userDetails.avatarUrl}
                 name={userDetails.initials}
                 size="sm"
                 className="h-8 w-8 flex-shrink-0"
@@ -250,6 +253,7 @@ export default function Navbar() {
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-3 py-4 border-b border-default-200">
                   <Avatar
+                    src={userDetails.avatarUrl}
                     name={userDetails.initials}
                     size="md"
                     className="h-10 w-10 flex-shrink-0"

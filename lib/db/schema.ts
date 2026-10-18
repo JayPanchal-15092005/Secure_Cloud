@@ -72,6 +72,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(), // bcrypt hashed password
   name: text("name"),
+  image: text("image"),
   createdAt: timestamp("created_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`timezone('Asia/Kolkata', now())`).notNull(),
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Trash, X, ArrowUpFromLine, Download } from "lucide-react";
+import { Star, Trash, X, ArrowUpFromLine, Download, Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import type { File as FileType } from "@/lib/db/schema";
 
@@ -10,6 +10,7 @@ interface FileActionsProps {
   onTrash: (id: string) => void;
   onDelete: (file: FileType) => void;
   onDownload: (file: FileType) => void;
+  onPreview?: (file: FileType) => void;
 }
 
 export default function FileActions({
@@ -18,16 +19,30 @@ export default function FileActions({
   onTrash,
   onDelete,
   onDownload,
+  onPreview,
 }: FileActionsProps) {
   return (
-    <div className="flex flex-wrap gap-2 justify-end">
+    <div className="flex flex-wrap gap-1.5 justify-end">
+      {/* Preview button */}
+      {!file.isTrash && !file.isFolder && onPreview && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onPreview(file)}
+          className="min-w-0 px-2 h-8"
+          startContent={<Eye className="h-4 w-4 text-primary" />}
+        >
+          <span className="hidden sm:inline">Preview</span>
+        </Button>
+      )}
+
       {/* Download button */}
       {!file.isTrash && !file.isFolder && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onDownload(file)}
-          className="min-w-0 px-2"
+          className="min-w-0 px-2 h-8"
           startContent={<Download className="h-4 w-4" />}
         >
           <span className="hidden sm:inline">Download</span>
@@ -40,7 +55,7 @@ export default function FileActions({
           variant="ghost"
           size="sm"
           onClick={() => onStar(file.id)}
-          className="min-w-0 px-2"
+          className="min-w-0 px-2 h-8"
           startContent={
             <Star
               className={`h-4 w-4 ${
@@ -62,7 +77,7 @@ export default function FileActions({
         variant="ghost"
         size="sm"
         onClick={() => onTrash(file.id)}
-        className="min-w-0 px-2"
+        className="min-w-0 px-2 h-8"
         color={file.isTrash ? "success" : "default"}
         startContent={
           file.isTrash ? (
@@ -84,7 +99,7 @@ export default function FileActions({
           size="sm"
           color="danger"
           onClick={() => onDelete(file)}
-          className="min-w-0 px-2"
+          className="min-w-0 px-2 h-8 text-danger hover:bg-danger/10"
           startContent={<X className="h-4 w-4" />}
         >
           <span className="hidden sm:inline">Remove</span>

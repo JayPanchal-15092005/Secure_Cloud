@@ -4,7 +4,6 @@ import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Input } from "./ui/input";
-import ImageKit from "imagekit-javascript";
 import {
   Upload,
   X,
@@ -12,6 +11,11 @@ import {
   AlertTriangle,
   FolderPlus,
   ArrowRight,
+  CheckCircle2,
+  FileText,
+  FileVideo2,
+  FileImage,
+  Plus,
 } from "lucide-react";
 import {
   Dialog,
@@ -30,15 +34,21 @@ interface FileUploadFormProps {
   currentFolder?: string | null;
 }
 
+interface SelectedFileItem {
+  id: string;
+  file: File;
+  error?: string | null;
+}
+
 export default function FileUploadForm({
   userId,
   onUploadSuccess,
   currentFolder = null,
 }: FileUploadFormProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [overallError, setOverallError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Folder creation state
@@ -46,7 +56,7 @@ export default function FileUploadForm({
   const [folderName, setFolderName] = useState("");
   const [creatingFolder, setCreatingFolder] = useState(false);
 
-  // size limits in bytes
+  // Size limits in bytes
   const LIMITS = {
     image: 50 * 1024 * 1024, // 50MB
     video: 400 * 1024 * 1024, // 400MB
@@ -56,68 +66,110 @@ export default function FileUploadForm({
   function validateFile(f: File): string | null {
     const { type, size } = f;
     if (type.startsWith("image/")) {
-      if (size > LIMITS.image) return "Image exceeds 50 MB limit";
+      if (size > LIMITS.image) return "Exceeds 50 MB limit";
       return null;
     }
     if (type.startsWith("video/")) {
-      if (size > LIMITS.video) return "Video exceeds 400 MB limit";
+      if (size > LIMITS.video) return "Exceeds 400 MB limit";
       return null;
     }
     if (type === "application/pdf") {
-      if (size > LIMITS.pdf) return "PDF exceeds 50 MB limit";
+      if (size > LIMITS.pdf) return "Exceeds 50 MB limit";
       return null;
     }
-    return "Unsupported file type";
+    return "Unsupported format (Images, Videos & PDFs only)";
   }
 
-  const handleFile = (f: File) => {
-    const validationError = validateFile(f);
-    if (validationError) {
-      setError(validationError);
-      return;
+  const addFiles = (filesList: FileList | File[]) => {
+    const newItems: SelectedFileItem[] = [];
+    const filesArray = Array.from(filesList);
+
+    for (const f of filesArray) {
+      // Avoid duplicate file names of same size in the batch
+      const isDuplicate = selectedFiles.some(
+        (item) => item.file.name === f.name && item.file.size === f.size
+      );
+      if (!isDuplicate) {
+        const error = validateFile(f);
+        newItems.push({
+          id: `${f.name}-${f.size}-${Date.now()}-${Math.random()}`,
+          file: f,
+          error,
+        });
+      }
     }
-    setFile(f);
-    setError(null);
+
+    if (newItems.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...newItems]);
+      setOverallError(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) handleFile(f);
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(e.target.files);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const f = e.dataTransfer.files?.[0];
-    if (f) handleFile(f);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const clearFile = () => {
-    setFile(null);
-    setError(null);
+  const removeFile = (id: string) => {
+    setSelectedFiles((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const clearAllFiles = () => {
+    setSelectedFiles([]);
+    setOverallError(null);
+    setProgress(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const humanSize = (n: number) =>
     n < 1024
-      ? `${n} B`
+      ? `${n} B`
       : n < 1024 * 1024
       ? `${(n / 1024).toFixed(1)} KB`
-      : `${(n / (1024 * 1024)).toFixed(1)} MB`;
+      : `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
-  const handleUpload = async () => { // 
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("userId", userId);
-    if (currentFolder) formData.append("parentId", currentFolder);
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      return <FileImage className="h-4 w-4 text-blue-500" />;
+    }
+    if (file.type.startsWith("video/")) {
+      return <FileVideo2 className="h-4 w-4 text-purple-500" />;
+    }
+    return <FileText className="h-4 w-4 text-red-500" />;
+  };
+
+  const validFiles = selectedFiles.filter((item) => !item.error);
+
+  const handleUpload = async () => {
+    if (validFiles.length === 0) {
+      setOverallError("Please add at least one valid file to upload.");
+      return;
+    }
 
     setUploading(true);
     setProgress(0);
-    setError(null);
+    setOverallError(null);
+
+    const formData = new FormData();
+    formData.append("userId", userId);
+    if (currentFolder) formData.append("parentId", currentFolder);
+
+    for (const item of validFiles) {
+      formData.append("files", item.file);
+    }
 
     try {
       await axios.post("/api/files/upload", formData, {
@@ -130,16 +182,17 @@ export default function FileUploadForm({
       });
 
       toast.success("Upload Successful", {
-        description: `${file.name} has been uploaded successfully.`,
+        description: `Successfully uploaded ${validFiles.length} file(s).`,
       });
-      clearFile();
+
+      clearAllFiles();
       onUploadSuccess?.();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to upload. Please try again.");
-      toast.error("Upload Failed", {
-        description: "We couldn't upload your file. Please try again.",
-      });
+      const msg =
+        err?.response?.data?.error || "Failed to upload. Please try again.";
+      setOverallError(msg);
+      toast.error("Upload Failed", { description: msg });
     } finally {
       setUploading(false);
     }
@@ -166,14 +219,9 @@ export default function FileUploadForm({
         description: `Folder "${folderName}" has been created successfully.`,
       });
 
-      // Reset folder name and close modal
       setFolderName("");
       setFolderModalOpen(false);
-
-      // Call the onUploadSuccess callback to refresh the file list
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
+      onUploadSuccess?.();
     } catch (error) {
       console.error("Error creating folder:", error);
       toast.error("Folder Creation Failed", {
@@ -186,6 +234,16 @@ export default function FileUploadForm({
 
   return (
     <div className="space-y-4">
+      {/* Hidden input supporting multiple files */}
+      <Input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        multiple
+        accept=".png,.jpg,.jpeg,.gif,.webp,.mp4,.mkv,.mov,.webm,.pdf"
+      />
+
       {/* Action buttons */}
       <div className="flex gap-2 mb-2">
         <Button
@@ -202,7 +260,7 @@ export default function FileUploadForm({
           onClick={() => fileInputRef.current?.click()}
           className="flex-1"
         >
-          Add File
+          Add Files
         </Button>
       </div>
 
@@ -211,105 +269,151 @@ export default function FileUploadForm({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         className={cn(
-          "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-          error
-            ? "border-danger/70 bg-danger/10"
-            : file
-            ? "border-primary/30 bg-primary/10"
+          "border-2 border-dashed rounded-lg p-5 text-center transition-colors",
+          selectedFiles.length > 0
+            ? "border-primary/40 bg-primary/5"
             : "border-default-300 hover:border-primary/50"
         )}
       >
-        {!file ? (
-          <div className="space-y-3">
-            <FileUp className="h-12 w-12 mx-auto text-primary/70" />
-            <p className="text-default-600">
-              Drag & drop an image, video or PDF here, or{" "}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-primary underline"
-              >
-                browse
-              </button>
-            </p>
-            <p className="text-xs text-default-500 mt-1">
-              Supported: images (≤90 MB), videos (≤100 MB), PDFs (≤90 MB)
-            </p>
-            <Input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              accept=".png,.jpg,.jpeg,.gif,.mp4,.mkv,.mov,.webm,.pdf"
-            />
+        {selectedFiles.length === 0 ? (
+          <div className="space-y-3 py-2">
+            <FileUp className="h-10 w-10 mx-auto text-primary/70" />
+            <div>
+              <p className="text-default-700 font-medium">
+                Drag & drop multiple files here, or{" "}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-primary underline font-semibold cursor-pointer"
+                >
+                  browse
+                </button>
+              </p>
+              <p className="text-xs text-default-500 mt-1">
+                Select multiple Images (≤50 MB), Videos (≤400 MB), or PDFs (≤50 MB)
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* File info */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary/10 rounded-md">
-                  <FileUp className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium truncate max-w-[180px]">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-default-500">
-                    {humanSize(file.size)}
-                  </p>
-                </div>
+          <div className="space-y-3 text-left">
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-xs font-semibold text-default-600 uppercase tracking-wider">
+                Selected Files ({selectedFiles.length})
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-7 text-xs px-2"
+                  startContent={<Plus className="h-3 w-3" />}
+                  disabled={uploading}
+                >
+                  Add More
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={clearAllFiles}
+                  className="h-7 text-xs px-2 text-default-500 hover:text-danger"
+                  disabled={uploading}
+                >
+                  Clear All
+                </Button>
               </div>
-              <Button
-                isIconOnly
-                variant="ghost"
-                size="sm"
-                onClick={clearFile}
-                className="text-default-500"
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="bg-danger/10 text-danger-700 p-3 rounded-lg flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm">{error}</span>
+            {/* List of selected files with scrollbar */}
+            <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+              {selectedFiles.map((item) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "flex items-center justify-between p-2 rounded-md border text-sm transition-colors",
+                    item.error
+                      ? "border-danger/40 bg-danger/10 text-danger"
+                      : "border-default-200 bg-background/80"
+                  )}
+                >
+                  <div className="flex items-center gap-2 overflow-hidden mr-2">
+                    {getFileIcon(item.file)}
+                    <div className="truncate">
+                      <p className="truncate font-medium text-xs text-default-800">
+                        {item.file.name}
+                      </p>
+                      <p className="text-[10px] text-default-500">
+                        {humanSize(item.file.size)}
+                        {item.error && (
+                          <span className="text-danger font-medium ml-1">
+                            • {item.error}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!uploading && (
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeFile(item.id)}
+                      className="h-6 w-6 min-w-6 text-default-400 hover:text-danger"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Overall Error display */}
+            {overallError && (
+              <div className="bg-danger/10 text-danger-700 p-2.5 rounded-md flex items-center gap-2 text-xs">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{overallError}</span>
               </div>
             )}
 
-            {/* Progress */}
+            {/* Progress bar */}
             {uploading && (
-              <Progress
-                value={progress}
-                size="sm"
-                showValueLabel
-                className="w-full"
-              />
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-default-600">
+                  <span>Uploading files...</span>
+                  <span>{progress}%</span>
+                </div>
+                <Progress value={progress} size="sm" className="w-full" />
+              </div>
             )}
 
-            {/* Upload button */}
+            {/* Upload Button */}
             <Button
               startContent={<Upload className="h-4 w-4" />}
               endContent={!uploading && <ArrowRight className="h-4 w-4" />}
               onClick={handleUpload}
               isLoading={uploading}
-              className="w-full"
+              disabled={validFiles.length === 0 || uploading}
+              className="w-full mt-2"
             >
-              {uploading ? `Uploading… ${progress}%` : "Upload File"}
+              {uploading
+                ? `Uploading ${validFiles.length} file(s)... ${progress}%`
+                : `Upload ${validFiles.length} File${
+                    validFiles.length === 1 ? "" : "s"
+                  }`}
             </Button>
           </div>
         )}
       </div>
 
-      {/* Tips */}
-      <div className="bg-default-100/5 p-4 rounded-lg">
-        <h4 className="text-sm font-medium mb-2">Tips</h4>
+      {/* Upload rules/tips */}
+      <div className="bg-default-100/40 p-3.5 rounded-lg border border-default-200/60">
+        <h4 className="text-xs font-semibold text-default-700 mb-1.5">
+          Supported Upload Formats
+        </h4>
         <ul className="text-xs text-default-600 space-y-1">
-          <li>• Images (jpg, png, gif…), ≤ 90 MB</li>
-          <li>• Videos (mp4, mkv…), ≤ 100 MB</li>
-          <li>• PDFs, ≤ 90 MB</li>
+          <li>• Images (JPG, PNG, GIF, WebP) up to 50 MB</li>
+          <li>• Videos (MP4, MKV, MOV, WebM) up to 400 MB</li>
+          <li>• Documents (PDF) up to 50 MB</li>
         </ul>
       </div>
 
@@ -317,30 +421,28 @@ export default function FileUploadForm({
       <Dialog
         isOpen={folderModalOpen}
         onOpenChange={setFolderModalOpen}
-        classNames={{ content: "border border-default-200 bg-default-5" }}
+        classNames={{ content: "border border-default-200 bg-default-50" }}
       >
-          <DialogHeader className="border-b border-default-200 flex gap-2 items-center">
-            <FolderPlus className="h-5 w-5 text-primary" />
-            <DialogTitle className="text-base font-medium">
-              New Folder
-            </DialogTitle>
-          </DialogHeader>
-          <DialogBody className="border-t border-default-200 px-6 py-4">
-            <p className="text-sm text-default-600 mb-2">
-              Enter a name for your folder:
-            </p>
-            <div className="px-6 pt-4">
+        <DialogHeader className="border-b border-default-200 flex gap-2 items-center">
+          <FolderPlus className="h-5 w-5 text-primary" />
+          <DialogTitle className="text-base font-medium">New Folder</DialogTitle>
+        </DialogHeader>
+        <DialogBody className="border-t border-default-200 px-6 py-4">
+          <p className="text-sm text-default-600 mb-2">
+            Enter a name for your folder:
+          </p>
+          <div className="px-6 pt-2">
             <Input
               type="text"
-              placeholder="My Images"
+              placeholder="e.g. Work Documents"
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
               autoFocus
             />
-            </div>
-          </DialogBody>
-          <DialogFooter className="border-t border-default-200 px-6 py-4">
-      { /*// */} <div className="flex items-center justify-end gap-4 w-full">
+          </div>
+        </DialogBody>
+        <DialogFooter className="border-t border-default-200 px-6 py-4">
+          <div className="flex items-center justify-end gap-3 w-full">
             <Button
               variant="destructive"
               onClick={() => setFolderModalOpen(false)}
@@ -355,8 +457,8 @@ export default function FileUploadForm({
             >
               Create
             </Button>
-            </div>
-          </DialogFooter>
+          </div>
+        </DialogFooter>
       </Dialog>
     </div>
   );
